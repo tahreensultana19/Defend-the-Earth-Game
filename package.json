@@ -1,12 +1,10 @@
 {
-  "name": "Defend-the-Earth-game",
+  "name": "defend-the-earth-game",
   "version": "1.0.0",
   "description": "A Phaser game built with React",
   "main": "index.js",
-  
   "dependencies": {
-    "phaser": "^3.55.2"
-    
+    "phaser": "^3.87.0"
   },
   "devDependencies": {
     "grunt": "^1.4.1",
