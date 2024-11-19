@@ -1,6 +1,6 @@
-class AlienInvasion extends Phaser.Scene {
+class DefendEarth extends Phaser.Scene {
   constructor() {
-    super({ key: "AlienInvasion" });
+    super({ key: "DefendEarth" });
     this.score = 0;
     this.health = 3;
     this.maxHealth = 3; // Define maximum health
@@ -526,4 +526,4 @@ class AlienInvasion extends Phaser.Scene {
   }
 }
 
-export default AlienInvasion;
+export default DefendEarth;

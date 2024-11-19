@@ -13,7 +13,7 @@ class MenuScene extends Phaser.Scene {
     this.background = this.add.image(400, 300, 'spaceBg').setDisplaySize(800, 600);
 
     // Add title with glowing effect
-    this.titleText = this.add.text(400, 100, 'Alien Invasion', {
+    this.titleText = this.add.text(400, 100, 'Defend Earth', {
       fontSize: '64px',
       fill: '#ffdd44',
       fontStyle: 'bold',
@@ -67,7 +67,7 @@ class MenuScene extends Phaser.Scene {
     this.tipsText.setVisible(false);
 
     // Keep the title visible and glowing
-    this.titleText.setText('Alien Invasion');
+    this.titleText.setText('Defend Earth');
     this.titleText.setVisible(true);
 
     // Add title for difficulty selection
@@ -109,7 +109,7 @@ class MenuScene extends Phaser.Scene {
   }
 
   startGame() {
-    this.scene.start('AlienInvasion', { difficulty: this.selectedDifficulty.toLowerCase() });
+    this.scene.start('DefendEarth', { difficulty: this.selectedDifficulty.toLowerCase() });
   }
 }
 

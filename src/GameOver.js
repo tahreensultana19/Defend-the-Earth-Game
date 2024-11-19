@@ -3,10 +3,10 @@ class GameOver extends Phaser.Scene {
     super({ key: 'GameOver' });
   }
 
-  // init(data) {
-  //   this.win = data.win || false; // Default to false if not provided
-  //   this.finalScore = data.score || 0; // Display final score
-  // }
+  init(data) {
+    this.win = data.win || false; // Default to false if not provided
+    this.finalScore = data.score || 0; // Display final score
+  }
 
   preload() {
     // Load background image
