@@ -1,10 +1,12 @@
 {
-  "name": "defend-the-earth-game",
+  "name": "alien-invasion-game",
   "version": "1.0.0",
   "description": "A Phaser game built with React",
   "main": "index.js",
+  
   "dependencies": {
-    "phaser": "^3.87.0"
+    "phaser": "^3.55.2"
+    
   },
   "devDependencies": {
     "grunt": "^1.4.1",

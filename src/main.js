@@ -1,4 +1,4 @@
-import DefendEarth from './DefendEarth.js';
+import AlienInvasion from './AlienInvasion.js';
 import GameOver from './GameOver.js';
 import MenuScene from './MenuScene.js';
 
@@ -10,7 +10,7 @@ const config = {
     default: 'arcade',
     arcade: { debug: false }
   },
-  scene: [DefendEarth, GameOver, MenuScene]  // Define your scenes here
+  scene: [AlienInvasion, GameOver,MenuScene]  // Define your scenes here
 };
 
 const game = new Phaser.Game(config);
