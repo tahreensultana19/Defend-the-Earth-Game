@@ -1,13 +1,12 @@
-
 class GameOver extends Phaser.Scene {
   constructor() {
     super({ key: 'GameOver' });
   }
 
-  init(data) {
-    this.win = data.win || false; // Default to false if not provided
-    this.finalScore = data.score || 0; // Display final score
-  }
+  // init(data) {
+  //   this.win = data.win || false; // Default to false if not provided
+  //   this.finalScore = data.score || 0; // Display final score
+  // }
 
   preload() {
     // Load background image
@@ -44,7 +43,7 @@ class GameOver extends Phaser.Scene {
 
     restartButtonBox.on('pointerdown', () => {
       this.scene.stop(); // Stop the current scene before starting a new one
-      this.scene.start('AlienInvasion', { difficulty: 'medium' }); // Pass any data if necessary
+      this.scene.start('DefendEarth', { difficulty: 'medium' }); // Pass any data if necessary
     });
 
     // Add "Main Menu" button
