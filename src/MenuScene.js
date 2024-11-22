@@ -6,23 +6,50 @@ class MenuScene extends Phaser.Scene {
   preload() {
     // Preload background and assets
     this.load.image('spaceBg', 'assets/space_bg.jpg'); // Space-themed background
+    this.load.audio('menuMusic', 'assets/menu_music.mp3'); // Add your music file
   }
 
   create() {
     // Add sky background
     this.background = this.add.image(400, 300, 'spaceBg').setDisplaySize(800, 600);
 
-    // Add title with gradient and glowing shadow
-    this.titleText = this.add.text(400, 100, 'DEFEND EARTH', {
-      fontSize: '64px',
-      fontFamily: 'Arial',
-      fontStyle: 'bold',
-      fill: 'linear-gradient(to right, #ff007f, #ff77ff)', // Gradient effect
-      stroke: '#ffffff', // White stroke
+    // Play menu music
+    this.menuMusic = this.sound.add('menuMusic', { loop: true, volume: 0.5 });
+    this.menuMusic.play();
+
+    // Add title with floating effect and shadows
+    this.titleText = this.add.text(400, 100, 'DEFENDER OF EARTH', {
+      fontSize: '60px',
+      fontFamily: 'Georgia',
+      fontStyle: 'italic bold',
+      fill: '#ff8800', // Bright orange text
+      stroke: '#000000', // Black stroke
       strokeThickness: 8,
     })
       .setOrigin(0.5)
-      .setShadow(0, 0, '#ff77ff', 15, true, true); // Neon-like glow
+      .setShadow(5, 5, '#000000', 10, false, true)
+      .setShadow(0, 0, '#ff4500', 15, true, false); 
+
+    // Add floating effect to title
+    this.tweens.add({
+      targets: this.titleText,
+      y: { from: 100, to: 120 }, 
+      duration: 2000,
+      yoyo: true,
+      repeat: -1,
+      ease: 'Sine.easeInOut',
+    });
+
+    // Add description text
+    this.descriptionText = this.add.text(400, 180, 'Aliens are attacking! You are the only hope.', {
+      fontSize: '28px',
+      fontFamily: 'Verdana',
+      fontStyle: 'bold',
+      fill: '#ffffff', // White text
+      stroke: '#000000', // Black stroke
+      strokeThickness: 5,
+    })
+      .setOrigin(0.5);
 
     // Add animated "Play" button with glassmorphism effect
     this.playButtonBox = this.add.rectangle(400, 300, 220, 60, 0xffffff, 0.2).setInteractive(); // Semi-transparent white
@@ -62,7 +89,7 @@ class MenuScene extends Phaser.Scene {
       'Tip: Power-ups can turn the tide!',
       'Tip: Dodge, aim, and dominate the sky!',
     ];
-    
+
     const randomTip = tips[Phaser.Math.Between(0, tips.length - 1)];
     this.tipsText = this.add.text(400, 570, randomTip, {
       fontSize: '25px',
@@ -96,9 +123,11 @@ class MenuScene extends Phaser.Scene {
 
   showDifficultySelection() {
     // Hide Play screen elements
+    this.menuMusic.stop(); // Stop menu music when transitioning
     this.playButtonBox.setVisible(false);
     this.playButtonText.setVisible(false);
     this.tipsText.setVisible(false);
+    this.descriptionText.setVisible(false);
 
     // Keep the title visible
     this.titleText.setVisible(true);
@@ -106,7 +135,7 @@ class MenuScene extends Phaser.Scene {
     // Add title for difficulty selection with a new text
     const difficultyTitle = this.add.text(400, 180, 'Pick Your Challenge', {
       fontSize: '48px',
-      fill: 'linear-gradient(to right, #ff77ff, #ff007f)', // Dynamic gradient
+      fill: '#ff8800', // Bright orange text
       stroke: '#ffffff',
       strokeThickness: 9,
     }).setOrigin(0.5);
@@ -119,7 +148,7 @@ class MenuScene extends Phaser.Scene {
       const yPosition = 250 + index * 80;
 
       const buttonBox = this.add.rectangle(400, yPosition, 220, 60, 0xffffff, 0.10).setInteractive();
-      buttonBox.setStrokeStyle(3.5, 0x000000, 0.8); // black border
+      buttonBox.setStrokeStyle(3.5, 0x000000, 0.8); // Black border
       const buttonText = this.add.text(400, yPosition, difficulty, {
         fontSize: '25px',
         fill: '#000000', // Darker text color for difficulty buttons
