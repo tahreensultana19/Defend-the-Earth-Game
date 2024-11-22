@@ -68,7 +68,7 @@ class AlienInvasion extends Phaser.Scene {
   
     create() {
         this.backgroundMusic = this.sound.add("backgroundMusic", { loop: true, volume: 0.5 }); // Add background music
-        this.backgroundMusic.play(); // Play background music
+        this.backgroundMusic.play(); 
     
     this.add.image(400, 300, "sky");
 
@@ -328,7 +328,7 @@ class AlienInvasion extends Phaser.Scene {
         break;
 
       case "spread":
-        this.activateSpreadPowerUp(); // New Spread Power-Up Activation
+        this.activateSpreadPowerUp(); 
         break;
       case "clone":
         this.activateClonePowerUp(); // Activate clone power-up
@@ -340,7 +340,7 @@ class AlienInvasion extends Phaser.Scene {
   }
 
   activateClonePowerUp() {
-    // If clone is already active, destroy the old clone and create a new one
+    
     if (this.cloneActive) {
       this.destroyClone(this.clone);
     }
