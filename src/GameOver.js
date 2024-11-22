@@ -43,7 +43,7 @@ class GameOver extends Phaser.Scene {
 
     restartButtonBox.on('pointerdown', () => {
       this.scene.stop(); // Stop the current scene before starting a new one
-      this.scene.start('AlienInvasion', { difficulty: 'medium' }); // Pass any data if necessary
+      this.scene.start('AlienInvasion', { difficulty: 'challenger' }); // Pass any data if necessary
     });
 
     // Add "Main Menu" button
@@ -59,16 +59,33 @@ class GameOver extends Phaser.Scene {
     });
 
     // Add hover effect for buttons
-    [restartButtonBox, menuButtonBox].forEach((button) => {
-      button.on('pointerover', () => {
-        button.setFillStyle(0xffffff); // Highlight when hovered
-      });
-      button.on('pointerout', () => {
-        // Revert to original color when not hovered
-        button.setFillStyle(button === restartButtonBox ? 0xff4444 : 0x4444ff);
-      });
+// Add hover effect for buttons
+// Add hover effect for buttons
+// Add hover effect for buttons
+[restartButtonBox, menuButtonBox].forEach((button, index) => {
+  // Add a black outline for the button
+  button.setStrokeStyle(3, 0x000000); // Black outline with thickness of 3
+
+  button.on('pointerover', () => {
+    button.setFillStyle(0x32cd32); // Highlight with lime green without transparency
+    // Make the corresponding text bold and white on hover
+    (index === 0 ? restartButtonText : menuButtonText).setStyle({
+      fontWeight: 'bold',
+      fill: '#ffffff', // White text on hover
     });
-  }
+  });
+
+  button.on('pointerout', () => {
+    // Revert to original solid color when not hovered
+    button.setFillStyle(button === restartButtonBox ? 0xff4500 : 0x4169e1); 
+    // Revert the text to normal weight and original color
+    (index === 0 ? restartButtonText : menuButtonText).setStyle({
+      fontWeight: 'normal',
+      fill: '#000000', // Black text when not hovered
+    });
+  });
+});
+}
 
   // Cleanup listeners when leaving the scene
   shutdown() {
