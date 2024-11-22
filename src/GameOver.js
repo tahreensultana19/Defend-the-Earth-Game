@@ -10,7 +10,7 @@ class GameOver extends Phaser.Scene {
 
   preload() {
     // Load background image
-    this.load.image('gameOverBg', 'assets/gameover_bg.jpg');
+    this.load.image('gameOverBg', 'assets/GameOver.jpg');
   }
 
   create() {
@@ -43,7 +43,7 @@ class GameOver extends Phaser.Scene {
 
     restartButtonBox.on('pointerdown', () => {
       this.scene.stop(); // Stop the current scene before starting a new one
-      this.scene.start('DefendEarth', { difficulty: 'medium' }); // Pass any data if necessary
+      this.scene.start('AlienInvasion', { difficulty: 'medium' }); // Pass any data if necessary
     });
 
     // Add "Main Menu" button

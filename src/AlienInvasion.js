@@ -1,6 +1,6 @@
-class DefendEarth extends Phaser.Scene {
+class AlienInvasion extends Phaser.Scene {
   constructor() {
-    super({ key: "DefendEarth" });
+    super({ key: "AlienInvasion" });
     this.score = 0;
     this.health = 3;
     this.maxHealth = 3; // Define maximum health
@@ -13,23 +13,23 @@ class DefendEarth extends Phaser.Scene {
   }
 
   init(data) {
-    this.difficulty = data.difficulty || "medium";
+    this.difficulty = data.difficulty || "challenger";
 
     // Adjust spawn rates and thresholds based on difficulty
     switch (this.difficulty) {
-      case "easy":
+      case "Beginner":
         this.alienSpawnRate = 2000;
         this.obstacleSpeed = 100;
         this.asteroidSpawnScoreThreshold = 100; // Easier threshold for asteroids
         this.bombSpawnScoreThreshold = 200; // Easier threshold for bombs
         break;
-      case "medium":
+      case "challenger":
         this.alienSpawnRate = 1500;
         this.obstacleSpeed = 150;
         this.asteroidSpawnScoreThreshold = 200;
         this.bombSpawnScoreThreshold = 350;
         break;
-      case "hard":
+      case "expert":
         this.alienSpawnRate = 1000;
         this.obstacleSpeed = 200;
         this.asteroidSpawnScoreThreshold = 300;
@@ -526,4 +526,4 @@ class DefendEarth extends Phaser.Scene {
   }
 }
 
-export default DefendEarth;
+export default AlienInvasion;
