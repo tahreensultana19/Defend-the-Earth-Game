@@ -43,7 +43,10 @@ class AlienInvasion extends Phaser.Scene {
     }
   }
 
-  preload() {
+  
+    preload() {
+        this.load.audio("backgroundMusic", "assets/backgroundmusic.m4a"); // Load background music
+    
     this.load.image("sky", "assets/bg.png");
     this.load.image("spaceship", "assets/1.png");
     this.load.image("alien", "assets/alien.png");
@@ -62,7 +65,11 @@ class AlienInvasion extends Phaser.Scene {
     this.load.image("powerup-clone", "assets/1.png");
   }
 
-  create() {
+  
+    create() {
+        this.backgroundMusic = this.sound.add("backgroundMusic", { loop: true, volume: 0.5 }); // Add background music
+        this.backgroundMusic.play(); // Play background music
+    
     this.add.image(400, 300, "sky");
 
     // Reset game state
@@ -100,7 +107,15 @@ class AlienInvasion extends Phaser.Scene {
     this.spacebar = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.SPACE
     );
-
+   
+    this.checkWinCondition = () => {
+      if (this.score >= 2000 && !this.gameOver) {
+        this.gameOver = true; // Prevent further updates
+        this.cleanup(); // Stop all timers and clear objects
+        this.scene.start("WinScreen", { score: this.score }); // Transition to WinScreen
+      }
+    };
+    
     // Alien spawning timer
     this.alienTimer = this.time.addEvent({
       delay: this.alienSpawnRate,
@@ -172,24 +187,27 @@ class AlienInvasion extends Phaser.Scene {
     } else {
       this.player.setVelocityX(0);
     }
-
+  
     if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
       if (this.spreadPowerActive) {
         this.shootSpread();
       }
       this.shootBullet();
     }
-
+  
     this.aliens.children.iterate((alien) => {
       if (alien && alien.y > 600) {
         this.loseHealth();
         alien.destroy();
       }
     });
-
+  
     this.scoreText.setText("Score: " + this.score);
+  
+    // Add the win condition check here
+    this.checkWinCondition();
   }
-
+  
   shootSpread() {
     const offsets = [-15, 0, 15]; // Three directions: slight left, center, slight right
 
@@ -484,6 +502,8 @@ class AlienInvasion extends Phaser.Scene {
 
     const points = 10 * this.scoreMultiplier;
     this.score += points;
+    this.checkWinCondition();
+
   }
 
   hitAsteroid(player, asteroid) {
@@ -512,7 +532,10 @@ class AlienInvasion extends Phaser.Scene {
     }
   }
 
-  cleanup() {
+  
+    cleanup() {
+        if (this.backgroundMusic) this.backgroundMusic.stop(); // Stop background music on cleanup
+    
     if (this.alienTimer) this.alienTimer.remove();
     if (this.asteroidTimer) this.asteroidTimer.remove();
     if (this.bombTimer) this.bombTimer.remove();
