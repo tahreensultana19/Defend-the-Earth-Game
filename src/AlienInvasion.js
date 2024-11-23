@@ -68,7 +68,7 @@ class AlienInvasion extends Phaser.Scene {
   
     create() {
         this.backgroundMusic = this.sound.add("backgroundMusic", { loop: true, volume: 0.5 }); // Add background music
-        this.backgroundMusic.play(); 
+        this.backgroundMusic.play(); // Play background music
     
     this.add.image(400, 300, "sky");
 
@@ -328,7 +328,7 @@ class AlienInvasion extends Phaser.Scene {
         break;
 
       case "spread":
-        this.activateSpreadPowerUp(); 
+        this.activateSpreadPowerUp(); // New Spread Power-Up Activation
         break;
       case "clone":
         this.activateClonePowerUp(); // Activate clone power-up
@@ -340,7 +340,7 @@ class AlienInvasion extends Phaser.Scene {
   }
 
   activateClonePowerUp() {
-    
+    // If clone is already active, destroy the old clone and create a new one
     if (this.cloneActive) {
       this.destroyClone(this.clone);
     }
@@ -481,7 +481,7 @@ class AlienInvasion extends Phaser.Scene {
 
     this.player.setTint(0x00ff00);
     this.shieldActive = true;
-    this.time.delayedCall(5000, () => {
+    this.time.delayedCall(30000, () => {
       this.player.clearTint();
       this.shieldActive = false;
     });
@@ -494,6 +494,16 @@ class AlienInvasion extends Phaser.Scene {
       this.scoreMultiplier = 1;
     });
   }
+  activateSpreadPowerUp() {
+    if (this.spreadPowerActive) return; // If already active, do nothing
+    this.spreadPowerActive = true;
+
+    // Deactivate the spread power-up after 15 seconds
+    this.time.delayedCall(15000, () => {
+        this.spreadPowerActive = false;
+    });
+}
+
 
   hitAlien(bullet, alien) {
     bullet.destroy();
@@ -509,14 +519,29 @@ class AlienInvasion extends Phaser.Scene {
   hitAsteroid(player, asteroid) {
     console.log("Asteroid hit detected!");
     asteroid.destroy();
-    this.loseHealth();
-  }
 
-  hitBomb(player, bomb) {
+    // Skip losing health if the shield is active
+    if (this.shieldActive) {
+        console.log("Shield protected the player from asteroid!");
+        return;
+    }
+
+    this.loseHealth();
+}
+
+hitBomb(player, bomb) {
     console.log("Bomb hit detected!");
     bomb.destroy();
+
+    // Skip losing health if the shield is active
+    if (this.shieldActive) {
+        console.log("Shield protected the player from bomb!");
+        return;
+    }
+
     this.loseHealth();
-  }
+}
+
 
   loseHealth() {
     this.health -= 1;
