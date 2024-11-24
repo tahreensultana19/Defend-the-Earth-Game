@@ -1,3 +1,5 @@
+import Boss from "./Boss.js"; // Adjust the path as needed
+
 class AlienInvasion extends Phaser.Scene {
   constructor() {
     super({ key: "AlienInvasion" });
@@ -10,6 +12,8 @@ class AlienInvasion extends Phaser.Scene {
     this.bombs = null;
     this.scoreMultiplier = 1; // Default multiplier
     this.shieldActive = false;
+    this.nextBossAt = 500;   // Score threshold for the next boss
+    this.currentBoss = null; // Reference to the active boss
   }
 
   init(data) {
@@ -43,10 +47,9 @@ class AlienInvasion extends Phaser.Scene {
     }
   }
 
-  
-    preload() {
-        this.load.audio("backgroundMusic", "assets/backgroundmusic.m4a"); // Load background music
-    
+  preload() {
+    this.load.audio("backgroundMusic", "assets/backgroundmusic.m4a"); // Load background music
+
     this.load.image("sky", "assets/bg.png");
     this.load.image("spaceship", "assets/1.png");
     this.load.image("alien", "assets/alien.png");
@@ -63,13 +66,21 @@ class AlienInvasion extends Phaser.Scene {
     this.load.image("powerup-spread", "assets/spread.png");
     this.load.image("heart", "assets/heart.png");
     this.load.image("powerup-clone", "assets/1.png");
+    this.load.image('bossProjectile1', 'assets/frames/charged1.png');
+    this.load.image('bossProjectile2', 'assets/frames/charged2.png');
+    this.load.image('bossProjectile3', 'assets/frames/charged3.png');
+    this.load.image('bossProjectile4', 'assets/frames/charged4.png');
+    this.load.image('bossProjectile5', 'assets/frames/charged5.png');
+    this.load.image('bossProjectile6', 'assets/frames/charged6.png');
   }
 
-  
-    create() {
-        this.backgroundMusic = this.sound.add("backgroundMusic", { loop: true, volume: 0.5 }); // Add background music
-        this.backgroundMusic.play(); // Play background music
-    
+  create() {
+    this.backgroundMusic = this.sound.add("backgroundMusic", {
+      loop: true,
+      volume: 0.5,
+    }); // Add background music
+    this.backgroundMusic.play(); // Play background music
+
     this.add.image(400, 300, "sky");
 
     // Reset game state
@@ -107,7 +118,7 @@ class AlienInvasion extends Phaser.Scene {
     this.spacebar = this.input.keyboard.addKey(
       Phaser.Input.Keyboard.KeyCodes.SPACE
     );
-   
+
     this.checkWinCondition = () => {
       if (this.score >= 2000 && !this.gameOver) {
         this.gameOver = true; // Prevent further updates
@@ -115,7 +126,7 @@ class AlienInvasion extends Phaser.Scene {
         this.scene.start("WinScreen", { score: this.score }); // Transition to WinScreen
       }
     };
-    
+
     // Alien spawning timer
     this.alienTimer = this.time.addEvent({
       delay: this.alienSpawnRate,
@@ -177,6 +188,9 @@ class AlienInvasion extends Phaser.Scene {
       null,
       this
     );
+
+    
+
   }
 
   update() {
@@ -187,26 +201,53 @@ class AlienInvasion extends Phaser.Scene {
     } else {
       this.player.setVelocityX(0);
     }
-  
+
     if (Phaser.Input.Keyboard.JustDown(this.spacebar)) {
       if (this.spreadPowerActive) {
         this.shootSpread();
       }
       this.shootBullet();
     }
-  
+
     this.aliens.children.iterate((alien) => {
       if (alien && alien.y > 600) {
         this.loseHealth();
         alien.destroy();
       }
     });
-  
+
     this.scoreText.setText("Score: " + this.score);
+
+    // Check for boss spawn
+    if (this.score >= this.nextBossAt && !this.currentBoss && !this.gameOver) {
+      console.log("Spawning boss at score:", this.score); // Debug log
+      this.spawnBoss();
+  }
   
+  if (this.currentBoss) {
+      this.currentBoss.update();
+  }
     // Add the win condition check here
     this.checkWinCondition();
   }
+
+  spawnBoss() {
+    if (this.currentBoss || this.gameOver) return;
+    
+    console.log("Boss spawn initiated");
+    this.allowAlienSpawns = false;
+    
+    // Create new boss instance
+    this.currentBoss = new Boss(this, this.score);
+    
+    // Add a direct handler for boss destroyed
+    this.currentBoss.on('destroy', () => {
+        console.log("Boss destroyed, resuming alien spawns");
+        this.allowAlienSpawns = true;
+        this.currentBoss = null;
+        this.nextBossAt = this.score + 500;
+    });
+}
   
   shootSpread() {
     const offsets = [-15, 0, 15]; // Three directions: slight left, center, slight right
@@ -239,7 +280,14 @@ class AlienInvasion extends Phaser.Scene {
   }
 
   spawnAliens() {
-    if (this.gameOver || !this.allowAlienSpawns) return;
+     // Add debug logs
+     console.log('Spawn check:', {
+      allowSpawns: this.allowAlienSpawns,
+      gameOver: this.gameOver,
+      hasBoss: !!this.currentBoss
+  });
+  
+  if (this.gameOver || !this.allowAlienSpawns) return;
 
     const speed = Phaser.Math.Between(50, 100);
     const alienCount = Phaser.Math.Between(1, 3);
@@ -421,22 +469,18 @@ class AlienInvasion extends Phaser.Scene {
       "bullet"
     );
     projectile.setDisplaySize(20, 40);
-    projectile.setVelocity(0,-900);
+    projectile.setVelocity(0, -900);
 
     // Add collision with aliens for clone's projectile
-    this.physics.add.collider(
-      projectile,
-      this.aliens,
-      (projectile, alien) => {
-        projectile.destroy();
-        alien.destroy();
-        this.sound.play("explosion");
+    this.physics.add.collider(projectile, this.aliens, (projectile, alien) => {
+      projectile.destroy();
+      alien.destroy();
+      this.sound.play("explosion");
 
-        // Update score when an alien is destroyed by the clone's projectile
-        const points = 10 * this.scoreMultiplier;
-        this.score += points;
-      }
-    );
+      // Update score when an alien is destroyed by the clone's projectile
+      const points = 10 * this.scoreMultiplier;
+      this.score += points;
+    });
 
     // Optional: Add a collision with enemies or asteroids
     this.physics.add.collider(
@@ -481,7 +525,7 @@ class AlienInvasion extends Phaser.Scene {
 
     this.player.setTint(0x00ff00);
     this.shieldActive = true;
-    this.time.delayedCall(30000, () => {
+    this.time.delayedCall(3000, () => {
       this.player.clearTint();
       this.shieldActive = false;
     });
@@ -500,10 +544,9 @@ class AlienInvasion extends Phaser.Scene {
 
     // Deactivate the spread power-up after 15 seconds
     this.time.delayedCall(15000, () => {
-        this.spreadPowerActive = false;
+      this.spreadPowerActive = false;
     });
-}
-
+  }
 
   hitAlien(bullet, alien) {
     bullet.destroy();
@@ -513,7 +556,6 @@ class AlienInvasion extends Phaser.Scene {
     const points = 10 * this.scoreMultiplier;
     this.score += points;
     this.checkWinCondition();
-
   }
 
   hitAsteroid(player, asteroid) {
@@ -522,26 +564,25 @@ class AlienInvasion extends Phaser.Scene {
 
     // Skip losing health if the shield is active
     if (this.shieldActive) {
-        console.log("Shield protected the player from asteroid!");
-        return;
+      console.log("Shield protected the player from asteroid!");
+      return;
     }
 
     this.loseHealth();
-}
+  }
 
-hitBomb(player, bomb) {
+  hitBomb(player, bomb) {
     console.log("Bomb hit detected!");
     bomb.destroy();
 
     // Skip losing health if the shield is active
     if (this.shieldActive) {
-        console.log("Shield protected the player from bomb!");
-        return;
+      console.log("Shield protected the player from bomb!");
+      return;
     }
 
     this.loseHealth();
-}
-
+  }
 
   loseHealth() {
     this.health -= 1;
@@ -557,10 +598,9 @@ hitBomb(player, bomb) {
     }
   }
 
-  
-    cleanup() {
-        if (this.backgroundMusic) this.backgroundMusic.stop(); // Stop background music on cleanup
-    
+  cleanup() {
+    if (this.backgroundMusic) this.backgroundMusic.stop(); // Stop background music on cleanup
+
     if (this.alienTimer) this.alienTimer.remove();
     if (this.asteroidTimer) this.asteroidTimer.remove();
     if (this.bombTimer) this.bombTimer.remove();
@@ -571,6 +611,10 @@ hitBomb(player, bomb) {
     this.bombs.clear(true, true);
     this.bullets.clear(true, true);
     this.powerUps.clear(true, true);
+    if (this.currentBoss) {
+      this.currentBoss.destroy(); // Ensure the boss is removed from the scene
+      this.currentBoss = null;
+    }
   }
 }
 
