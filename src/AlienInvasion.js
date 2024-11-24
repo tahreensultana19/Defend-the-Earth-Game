@@ -1,5 +1,4 @@
-import Boss from "./Boss.js"; // Adjust the path as needed
-
+import Boss from "./Boss.js";
 class AlienInvasion extends Phaser.Scene {
   constructor() {
     super({ key: "AlienInvasion" });
@@ -12,39 +11,36 @@ class AlienInvasion extends Phaser.Scene {
     this.bombs = null;
     this.scoreMultiplier = 1; // Default multiplier
     this.shieldActive = false;
+    this.winScoreThreshold = 0; // Initialize with default value
+    this.difficulty = ''; // Will store difficulty
+    this.cloneActive = false; // Track if clone power-up is active
+    this.spreadPowerActive = false; // Track spread power-up status
+    this.level = 1; // Default level
     this.nextBossAt = 500;   // Score threshold for the next boss
-    this.currentBoss = null; // Reference to the active boss
+    this.currentBoss = null;
   }
 
   init(data) {
-    this.difficulty = data.difficulty || "challenger";
+    // Ensure that the data passed contains the difficulty and level
+    this.difficulty = data.difficulty || 'Beginner'; // Default to 'Beginner' if not passed
+    // console.log(AlienInvasion scene started with difficulty: ${this.difficulty});
 
-    // Adjust spawn rates and thresholds based on difficulty
+    // Adjust win score threshold based on the difficulty
     switch (this.difficulty) {
       case "Beginner":
-        this.alienSpawnRate = 2000;
-        this.obstacleSpeed = 100;
-        this.asteroidSpawnScoreThreshold = 100; // Easier threshold for asteroids
-        this.bombSpawnScoreThreshold = 200; // Easier threshold for bombs
+        this.winScoreThreshold = 1000; // Set threshold for Beginner
         break;
       case "challenger":
-        this.alienSpawnRate = 1500;
-        this.obstacleSpeed = 150;
-        this.asteroidSpawnScoreThreshold = 200;
-        this.bombSpawnScoreThreshold = 350;
+        this.winScoreThreshold = 2000; // Set threshold for Challenger
         break;
       case "expert":
-        this.alienSpawnRate = 1000;
-        this.obstacleSpeed = 200;
-        this.asteroidSpawnScoreThreshold = 300;
-        this.bombSpawnScoreThreshold = 450;
+        this.winScoreThreshold = 2500; // Set threshold for Expert
         break;
       default:
-        this.alienSpawnRate = 1500;
-        this.obstacleSpeed = 150;
-        this.asteroidSpawnScoreThreshold = 200;
-        this.bombSpawnScoreThreshold = 350;
+        this.winScoreThreshold = 1000; 
     }
+
+    // console.log(Win score threshold set to: ${this.winScoreThreshold});
   }
 
   preload() {
@@ -75,10 +71,7 @@ class AlienInvasion extends Phaser.Scene {
   }
 
   create() {
-    this.backgroundMusic = this.sound.add("backgroundMusic", {
-      loop: true,
-      volume: 0.5,
-    }); // Add background music
+    this.backgroundMusic = this.sound.add("backgroundMusic", { loop: true, volume: 0.5 }); // Add background music
     this.backgroundMusic.play(); // Play background music
 
     this.add.image(400, 300, "sky");
@@ -120,16 +113,27 @@ class AlienInvasion extends Phaser.Scene {
     );
 
     this.checkWinCondition = () => {
-      if (this.score >= 2000 && !this.gameOver) {
-        this.gameOver = true; // Prevent further updates
-        this.cleanup(); // Stop all timers and clear objects
-        this.scene.start("WinScreen", { score: this.score }); // Transition to WinScreen
+      // Check if the score has reached the win threshold and if the game is not already over
+      if (this.score >= this.winScoreThreshold && !this.gameOver) {
+        this.gameOver = true; // Mark the game as over to prevent further checks
+
+        // Perform any cleanup tasks (e.g., stop enemies, clear timers, etc.)
+        this.cleanup();
+
+        // Transition to the WinScreen with a delay
+        this.time.delayedCall(500, () => {
+          this.scene.start('WinScreen', {
+            level: this.level,         // Pass the current level
+            score: this.score,         // Pass the current score
+            difficulty: this.difficulty // Pass the current difficulty level
+          });
+        }, [], this);
       }
     };
 
     // Alien spawning timer
     this.alienTimer = this.time.addEvent({
-      delay: this.alienSpawnRate,
+      delay: 3000,
       callback: this.spawnAliens,
       callbackScope: this,
       loop: true,
@@ -188,9 +192,6 @@ class AlienInvasion extends Phaser.Scene {
       null,
       this
     );
-
-    
-
   }
 
   update() {
@@ -218,19 +219,9 @@ class AlienInvasion extends Phaser.Scene {
 
     this.scoreText.setText("Score: " + this.score);
 
-    // Check for boss spawn
-    if (this.score >= this.nextBossAt && !this.currentBoss && !this.gameOver) {
-      console.log("Spawning boss at score:", this.score); // Debug log
-      this.spawnBoss();
-  }
-  
-  if (this.currentBoss) {
-      this.currentBoss.update();
-  }
     // Add the win condition check here
     this.checkWinCondition();
   }
-
   spawnBoss() {
     if (this.currentBoss || this.gameOver) return;
     
@@ -248,7 +239,7 @@ class AlienInvasion extends Phaser.Scene {
         this.nextBossAt = this.score + 500;
     });
 }
-  
+
   shootSpread() {
     const offsets = [-15, 0, 15]; // Three directions: slight left, center, slight right
 
@@ -286,8 +277,7 @@ class AlienInvasion extends Phaser.Scene {
       gameOver: this.gameOver,
       hasBoss: !!this.currentBoss
   });
-  
-  if (this.gameOver || !this.allowAlienSpawns) return;
+    if (this.gameOver || !this.allowAlienSpawns) return;
 
     const speed = Phaser.Math.Between(50, 100);
     const alienCount = Phaser.Math.Between(1, 3);
@@ -301,9 +291,9 @@ class AlienInvasion extends Phaser.Scene {
   }
 
   spawnAsteroids() {
-    if (this.gameOver || this.score < this.asteroidSpawnScoreThreshold) return;
+    if (this.gameOver) return;
 
-    const speed = this.obstacleSpeed + Phaser.Math.Between(-50, 50);
+    const speed = Phaser.Math.Between(50, 100);
     const asteroidX = Phaser.Math.Between(50, 750);
     const asteroidY = -50; // Start from above the screen
 
@@ -316,11 +306,11 @@ class AlienInvasion extends Phaser.Scene {
     if (this.gameOver || this.score < this.bombSpawnScoreThreshold) return;
 
     const speed = this.obstacleSpeed + Phaser.Math.Between(-50, 50);
+
     const bombX = Phaser.Math.Between(50, 750);
     const bombY = -50; // Start from above the screen
-
     const bomb = this.bombs.create(bombX, bombY, "bomb");
-    bomb.setVelocityY(speed);
+    bomb.setVelocityY(100); // Bomb falls down with this speed
     bomb.setDisplaySize(32, 32);
   }
 

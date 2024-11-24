@@ -1,12 +1,23 @@
 export default class WinScreen extends Phaser.Scene {
     constructor() {
         super({ key: 'WinScreen' });
+        this.level = ''; // To store the level information
+        this.score = 0; // To store the winning score
+        this.difficulty = ''; // To store the difficulty level
     }
 
     preload() {
-        // Preload the background image and music
-        this.load.image('winBackground', 'assets/win_background.jpg'); // Replace with your background image path
-        this.load.audio('menuMusic', 'assets/menu_music.mp3'); // Load the same music as MenuScene
+        this.load.image('winBackground', 'assets/win_background.jpg'); // Background image for the win screen
+        this.load.audio('menuMusic', 'assets/menu_music.mp3'); // Background music
+    }
+
+    init(data) {
+        // Get the data passed from the AlienInvasion scene
+        this.level = data.level || 'beginner'; // Default to 'beginner' if no level passed
+        this.score = data.score || 0; // Default to 0 score if no score passed
+        this.difficulty = data.difficulty || 'Beginner'; // Default to 'Beginner' difficulty if none passed
+
+        console.log(WinScreen -`Level: ${this.level}, Score: ${this.score}, Difficulty: ${this.difficulty}`);
     }
 
     create() {
@@ -36,25 +47,42 @@ export default class WinScreen extends Phaser.Scene {
             strokeThickness: 4,
         }).setOrigin(0.5);
 
+        // Display the score
+        this.add.text(width / 2, height / 2, `Score: ${this.score}`, {
+            fontSize: '40px',
+            color: '#ffcc00',
+            fontStyle: 'bold',
+            stroke: '#000000',
+            strokeThickness: 4,
+        }).setOrigin(0.5);
+
+        // Display the difficulty
+        this.add.text(width / 2, height / 1.8, `Difficulty: ${this.difficulty}`, {
+            fontSize: '32px',
+            color: '#ffffff',
+            stroke: '#000000',
+            strokeThickness: 4,
+        }).setOrigin(0.5);
+
         // Replay button
         const replayButton = this.createStyledButton(
             width / 2,
-            height / 2,
+            height / 1.5,
             'Replay',
             () => {
                 this.stopMusic();
-                this.scene.start('AlienInvasion'); // Replace with your main game scene key
+                this.scene.start('AlienInvasion', { level: this.level, difficulty: this.difficulty });
             }
         );
 
         // Main Menu button
         const menuButton = this.createStyledButton(
             width / 2,
-            height / 1.5,
+            height / 1.25,
             'Main Menu',
             () => {
                 this.stopMusic();
-                this.scene.start('MenuScene'); // Replace with your menu scene key
+                this.scene.start('MenuScene');
             }
         );
     }
@@ -94,7 +122,6 @@ export default class WinScreen extends Phaser.Scene {
         return buttonText;
     }
 
-    // Stop the background music
     stopMusic() {
         if (this.winMusic) {
             this.winMusic.stop();
