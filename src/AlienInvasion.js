@@ -44,7 +44,7 @@ class AlienInvasion extends Phaser.Scene {
   }
 
   preload() {
-    this.load.audio("backgroundMusic", "assets/backgroundmusic.m4a"); // Load background music
+    this.load.audio("backgroundMusic", "assets/background1.mp3"); // Load background music
 
     this.load.image("sky", "assets/bg.png");
     this.load.image("spaceship", "assets/1.png");
@@ -71,7 +71,7 @@ class AlienInvasion extends Phaser.Scene {
   }
 
   create() {
-    this.backgroundMusic = this.sound.add("backgroundMusic", { loop: true, volume: 0.5 }); // Add background music
+    this.backgroundMusic = this.sound.add("backgroundMusic", { loop: true, volume: 1.0 }); // Add background music
     this.backgroundMusic.play(); // Play background music
 
     this.add.image(400, 300, "sky");
