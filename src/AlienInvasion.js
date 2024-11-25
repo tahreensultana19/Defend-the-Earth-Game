@@ -40,7 +40,7 @@ class AlienInvasion extends Phaser.Scene {
         this.winScoreThreshold = 1000; 
     }
 
-    // console.log(Win score threshold set to: ${this.winScoreThreshold});
+    console.log(`Win score threshold set to: ${this.winScoreThreshold}`);
   }
 
   preload() {
