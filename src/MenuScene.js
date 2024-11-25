@@ -6,7 +6,7 @@ class MenuScene extends Phaser.Scene {
   preload() {
     // Preload background and assets
     this.load.image('spaceBg', 'assets/space_bg.jpg'); // Space-themed background
-    this.load.audio('menuMusic', 'assets/menu_music.mp3'); // Add your music file
+    this.load.audio('menuMusic', 'assets/menu_musicnew.mp3'); // Add your music file
   }
 
   create() {
