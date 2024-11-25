@@ -14,7 +14,7 @@ class MenuScene extends Phaser.Scene {
     this.background = this.add.image(400, 300, 'spaceBg').setDisplaySize(800, 600);
 
     // Play menu music
-    this.menuMusic = this.sound.add('menuMusic', { loop: true, volume: 0.5 });
+    this.menuMusic = this.sound.add('menuMusic', { loop: true, volume: 1.0 });
     this.menuMusic.play();
 
     // Add title with floating effect and shadows
@@ -123,7 +123,7 @@ class MenuScene extends Phaser.Scene {
 
   showDifficultySelection() {
     // Hide Play screen elements
-    this.menuMusic.stop(); // Stop menu music when transitioning
+    // this.menuMusic.stop(); // Stop menu music when transitioning
     this.playButtonBox.setVisible(false);
     this.playButtonText.setVisible(false);
     this.tipsText.setVisible(false);
