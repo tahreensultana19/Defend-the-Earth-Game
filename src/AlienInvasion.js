@@ -20,43 +20,28 @@ class AlienInvasion extends Phaser.Scene {
     this.currentBoss = null;
   }
 
-  
   init(data) {
-    // Ensure that the data passed contains difficulty, level, and score
+    // Ensure that the data passed contains the difficulty and level
     this.difficulty = data.difficulty || 'Beginner'; // Default to 'Beginner' if not passed
-    this.score = data.score || 0; // Default to 0 score if not passed
-    this.level = data.level || 'beginner'; // Default to 'beginner' if not passed
-
-    // Log the received data for debugging purposes
-    console.log(`AlienInvasion scene started with difficulty: ${this.difficulty}, level: ${this.level}, score: ${this.score}`);
+    // console.log(AlienInvasion scene started with difficulty: ${this.difficulty});
 
     // Adjust win score threshold based on the difficulty
-    switch (this.difficulty.toLowerCase()) {
-        case "beginner":
-            this.winScoreThreshold = 1000; // Set threshold for Beginner
-            break;
-        case "challenger":
-            this.winScoreThreshold = 2000; // Set threshold for Challenger
-            break;
-        case "expert":
-            this.winScoreThreshold = 2500; // Set threshold for Expert
-            break;
-        default:
-            this.winScoreThreshold = 1000; // Default to Beginner threshold if something goes wrong
+    switch (this.difficulty) {
+      case "Beginner":
+        this.winScoreThreshold = 1000; // Set threshold for Beginner
+        break;
+      case "challenger":
+        this.winScoreThreshold = 2000; // Set threshold for Challenger
+        break;
+      case "expert":
+        this.winScoreThreshold = 2500; // Set threshold for Expert
+        break;
+      default:
+        this.winScoreThreshold = 1000; 
     }
 
-    // Log the win score threshold for debugging purposes
     console.log(`Win score threshold set to: ${this.winScoreThreshold}`);
-
-    // Check if the player's score is above the threshold for the current difficulty
-    if (this.score >= this.winScoreThreshold) {
-        console.log('Player has won!');
-        // Optionally, display a congratulatory message or trigger an event
-    } else {
-        console.log('Player has not reached the required score to win');
-    }
-}
-
+  }
 
   preload() {
     this.load.audio("backgroundMusic", "assets/background1.mp3"); // Load background music
@@ -83,8 +68,22 @@ class AlienInvasion extends Phaser.Scene {
     this.load.image('bossProjectile4', 'assets/frames/charged4.png');
     this.load.image('bossProjectile5', 'assets/frames/charged5.png');
     this.load.image('bossProjectile6', 'assets/frames/charged6.png');
+    this.load.spritesheet("explosion", "assets/explosion.png", { frameWidth: 64, frameHeight: 64 });
+    this.load.image('blast1', 'assets/blast/blast1.png');
+    this.load.image('blast2', 'assets/blast/blast2.png');
+    this.load.image('blast3', 'assets/blast/blast3.png');
+    this.load.image('blast4', 'assets/blast/blast4.png');
+    this.load.image('blast5', 'assets/blast/blast5.png');
+    this.load.image('blast6', 'assets/blast/blast6.png');
+    this.load.image('blast7', 'assets/blast/blast7.png');
+    this.load.image('blast', 'assets/blast/blast8.png');
+    this.load.image('blast9', 'assets/blast/blast9.png');
+    this.load.image('blast10', 'assets/blast/blast10.png');
+    this.load.image('blast11', 'assets/blast/blast11.png');
+ 
+    // this.load.audio('explosionSound', 'assets/sounds/explosion.mp3');
   }
-
+  
   create() {
     this.backgroundMusic = this.sound.add("backgroundMusic", { loop: true, volume: 1.0 }); // Add background music
     this.backgroundMusic.play(); // Play background music
@@ -112,6 +111,28 @@ class AlienInvasion extends Phaser.Scene {
       fontSize: "32px",
       fill: "#fff",
     });
+
+    // Create the explosion animation using the 5 blast images
+    this.anims.create({
+      key: 'explode',
+      frames: [
+          { key: 'blast1' },
+          { key: 'blast2' },
+          { key: 'blast3' },
+          { key: 'blast4' },
+          { key: 'blast5' },
+          { key: 'blast6' },
+          { key: 'blast7' },
+          { key: 'blast8' },
+          { key: 'blast9' },
+          { key: 'blast10' },
+          { key: 'blast11' }
+
+      ],
+      frameRate: 10,  // Adjust frame rate to control speed
+      yoyo: false,    // Animation should not loop
+      repeat: 0       // Play the animation once
+  });
 
     this.hearts = [];
     for (let i = 0; i < this.maxHealth; i++) {
@@ -557,6 +578,13 @@ class AlienInvasion extends Phaser.Scene {
     bullet.destroy();
     alien.destroy();
     this.sound.play("explosion");
+
+    // Create explosion animation
+    const explosion = this.physics.add.sprite(alien.x, alien.y, "explosion");
+    explosion.play("explode"); // Play the explosion animation
+    explosion.on("animationcomplete", () => {
+        explosion.destroy(); // Destroy the explosion sprite after the animation is complete
+    });
 
     const points = 10 * this.scoreMultiplier;
     this.score += points;
