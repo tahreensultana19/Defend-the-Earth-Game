@@ -2,53 +2,87 @@ class Boss extends Phaser.GameObjects.Sprite {
     constructor(scene, score) {
         super(scene, scene.game.config.width / 2, -50, 'alien');
         
-        // Bind the shoot method to the class instance
-        this.shoot = this.shoot.bind(this);
+        this.events = new Phaser.Events.EventEmitter();
         
         this.scene = scene;
         this.score = score;
         
-        // Add boss to the scene and enable physics
+        // Set boss health based on score
+        this.maxHealth = this.calculateHealth(score);
+        this.health = this.maxHealth;
+        this.bulletDamage = 5;
+        
         scene.add.existing(this);
         scene.physics.add.existing(this);
+
+        // Fix physics body
+        this.body.setAllowGravity(false);
+        this.body.setImmovable(true);
         
-        // Set boss properties
         this.setScale(2);
-        this.health = 100;
-        this.maxHealth = 100;
+        this.isInvulnerable = false;
         
-        // Movement properties
         this.moveSpeed = 150;
         this.phase = 'entrance';
         
-        // Attack properties
-        this.projectiles = scene.physics.add.group();
+        this.projectiles = scene.physics.add.group({
+            allowGravity: false
+        });
+
+        // Add collision between projectiles and player
+        scene.physics.add.collider(
+            scene.player,
+            this.projectiles,
+            this.hitPlayer,
+            null,
+            this
+        );
+        
         this.lastShot = 0;
         this.shotDelay = 1000;
         
-        // Create health bar
-        this.healthBar = scene.add.rectangle(
+        // Create health bar container
+        this.healthBarWidth = 100;
+        this.healthBarHeight = 10;
+        
+        this.healthBarBackground = scene.add.rectangle(
             this.x,
             this.y - 40,
-            100,
-            10,
-            0xff0000
+            this.healthBarWidth,
+            this.healthBarHeight,
+            0x333333
         );
         
-        // Enter animation
-        scene.tweens.add({
-            targets: this,
-            y: 100,
-            duration: 2000,
-            ease: 'Power2',
-            onComplete: () => {
-                this.phase = 'battle';
-                this.startAttackPattern();
-            }
+        this.healthBar = scene.add.rectangle(
+            this.x - (this.healthBarWidth / 2),
+            this.y - 40,
+            this.healthBarWidth,
+            this.healthBarHeight,
+            0x00ff00
+        );
+        this.healthBar.setOrigin(0, 0.5);
+
+        this.debugText = scene.add.text(10, 50, '', { fontSize: '16px', fill: '#fff' });
+        
+        // Entrance animation using physics instead of tween
+        this.body.reset(scene.game.config.width / 2, -50);
+        this.body.setVelocityY(100);
+
+        // Check for reaching battle position
+        this.scene.time.addEvent({
+            delay: 100,
+            callback: () => {
+                if (this.y >= 100 && this.phase === 'entrance') {
+                    this.body.setVelocityY(0);
+                    this.y = 100;
+                    this.phase = 'battle';
+                    this.startAttackPattern();
+                }
+            },
+            loop: true
         });
 
-        // Initialize animations
-        if (!scene.anims.exists('bossProjectileAnim')) {
+        if (!scene.anims.exists('bossProjez ctileAnim')) {
             scene.anims.create({
                 key: 'bossProjectileAnim',
                 frames: [
@@ -64,47 +98,62 @@ class Boss extends Phaser.GameObjects.Sprite {
             });
         }
 
-        // Add bullet collider
-        scene.physics.add.collider(
-            this,
-            scene.bullets,
-            this.onHit,
-            null,
-            this
-        );
+        console.log('Boss created with health:', this.health);
     }
-    
-    startAttackPattern() {
-        // Movement pattern
-        this.movePattern = this.scene.tweens.add({
-            targets: this,
-            x: '+=200',
-            duration: 2000,
-            yoyo: true,
-            repeat: -1,
-            ease: 'Sine.easeInOut'
+
+    // Calculate boss health based on score
+    calculateHealth = (score) => {
+        let baseHealth = 100;
+        
+        if (score >= 1000) {
+            baseHealth = 200;  // More health at higher scores
+        }
+        if (score >= 2000) {
+            baseHealth = 300;  // Even more health at very high scores
+        }
+        
+        return baseHealth;
+    }
+
+    // Handle player collision with boss projectiles
+    hitPlayer = (player, projectile) => {
+        if (!this.scene.shieldActive) {  // Check if player's shield is active
+            projectile.destroy();
+            this.scene.loseHealth();  // This will reduce player health by 1
+        } else {
+            projectile.destroy();  // Just destroy projectile if shield is active
+        }
+    }
+
+    startAttackPattern = () => {
+        this.moveDirection = 1;
+        this.body.setVelocityX(this.moveSpeed);
+        
+        this.moveTimer = this.scene.time.addEvent({
+            delay: 50,
+            callback: () => {
+                if (this.x >= this.scene.game.config.width - 50) {
+                    this.moveDirection = -1;
+                    this.body.setVelocityX(-this.moveSpeed);
+                } else if (this.x <= 50) {
+                    this.moveDirection = 1;
+                    this.body.setVelocityX(this.moveSpeed);
+                }
+            },
+            loop: true
         });
         
-        // Start shooting with proper context binding
         this.shootTimer = this.scene.time.addEvent({
             delay: this.shotDelay,
-            callback: this.shoot,  // This will now maintain proper context
-            callbackScope: this,   // Explicitly set the callback scope
+            callback: this.shoot,
             loop: true
         });
     }
 
-    createProjectile(x, y) {
-        const projectile = this.projectiles.create(x, y, 'bossProjectile1');
-        projectile.play('bossProjectileAnim');
-        projectile.setScale(0.8);
-        return projectile;
-    }
-    
-    shoot() {
+    shoot = () => {
         if (!this.scene || this.phase !== 'battle') return;
         
-        const angles = [-15, 0, 15];
+        const angles = [-30, 0, 30];
         angles.forEach(angle => {
             const projectile = this.createProjectile(this.x, this.y + 20);
             
@@ -115,86 +164,109 @@ class Boss extends Phaser.GameObjects.Sprite {
                 Math.sin(radians) * speed
             );
             
-            // Use a safe reference to the scene
-            const currentScene = this.scene;
-            if (currentScene && currentScene.time) {
-                currentScene.time.delayedCall(3000, () => {
+            if (this.scene && this.scene.time) {
+                this.scene.time.delayedCall(3000, () => {
                     if (projectile && projectile.active) {
                         projectile.destroy();
                     }
                 });
             }
         });
-        
-        // Add collision between projectiles and player if not already added
-        if (!this.projectileCollider && this.scene && this.scene.player) {
-            this.projectileCollider = this.scene.physics.add.collider(
-                this.scene.player,
-                this.projectiles,
-                (player, projectile) => {
-                    projectile.destroy();
-                    if (!this.scene.shieldActive) {
-                        this.scene.loseHealth();
-                    }
-                }
-            );
-        }
     }
-    
-    onHit(boss, bullet) {
-        if (!this.scene) return;
-        
-        bullet.destroy();
-        this.scene.sound.play('explosion');
-        
-        this.scene.tweens.add({
-            targets: this,
-            alpha: 0.5,
-            duration: 100,
-            yoyo: true
+
+    // Rest of the methods remain the same...
+    createProjectile = (x, y) => {
+        const projectile = this.projectiles.create(x, y, 'bossProjectile1');
+        projectile.play('bossProjectileAnim');
+        projectile.setScale(0.8);
+        projectile.setAngle(90);    
+        return projectile;
+    }
+
+    takeDamage = (amount) => {
+        if (this.isInvulnerable || this.phase !== 'battle') return;
+
+        this.health -= amount;
+        console.log('Boss took damage. Health:', this.health);
+
+        this.setTint(0xff0000);
+        this.scene.time.delayedCall(100, () => {
+            this.clearTint();
         });
-        
-        this.health -= 10;
-        const healthPercent = this.health / this.maxHealth;
-        this.healthBar.setScale(healthPercent, 1);
-        
+
+        this.updateHealthBar();
+
         if (this.health <= 0) {
             this.defeat();
         }
     }
+
+    // Keep the rest of the methods the same...
+    onHit = (bullet) => {
+        if (this.phase !== 'battle' || this.isInvulnerable) return;
+
+        bullet.destroy();
+        this.scene.sound.play('explosion');
+        this.takeDamage(this.bulletDamage);
+    }
     
-    defeat() {
+    updateHealthBar = () => {
         if (!this.scene) return;
         
-        if (this.movePattern) this.movePattern.stop();
-        if (this.shootTimer) this.shootTimer.destroy();
+        const healthPercent = Math.max(0, this.health) / this.maxHealth;
+        this.healthBar.width = this.healthBarWidth * healthPercent;
         
+        this.debugText.setText(`Boss Health: ${Math.round(this.health)}/${this.maxHealth}`);
+        
+        let color;
+        if (healthPercent > 0.6) {
+            color = 0x00ff00;
+        } else if (healthPercent > 0.3) {
+            color = 0xffff00;
+        } else {
+            color = 0xff0000;
+        }
+        this.healthBar.setFillStyle(color);
+    }
+    
+    defeat = () => {
+        if (!this.scene || this.phase === 'defeated') return;
+        
+        this.phase = 'defeated';
+        this.isInvulnerable = true;
+        
+        this.body.setVelocity(0, 0);
+        if (this.moveTimer) this.moveTimer.destroy();
+        if (this.shootTimer) this.shootTimer.destroy();
         this.projectiles.clear(true, true);
         
-        if (this.projectileCollider) {
-            this.projectileCollider.destroy();
-        }
-        
         this.scene.tweens.add({
-            targets: [this, this.healthBar],
+            targets: [this, this.healthBarBackground, this.healthBar],
             alpha: 0,
-            scale: 2,
-            duration: 500,
+            rotation: 2,
+            scaleX: 0,
+            scaleY: 0,
+            duration: 1500,
+            ease: 'Power2',
             onComplete: () => {
                 if (!this.scene) return;
                 
                 this.scene.score += 200;
+                this.healthBarBackground.destroy();
                 this.healthBar.destroy();
+                this.debugText.destroy();
                 
-                // Just destroy the boss - the event handler in AlienInvasion will handle the rest
+                this.events.emit('destroy');
                 this.destroy();
             }
         });
     }
-    update() {
+    
+    update = () => {
         if (!this.scene) return;
         
-        this.healthBar.setPosition(this.x, this.y - 40);
+        this.healthBarBackground.setPosition(this.x, this.y - 40);
+        this.healthBar.setPosition(this.x - (this.healthBarWidth / 2), this.y - 40);
         
         this.projectiles.children.each(projectile => {
             if (projectile.y > this.scene.game.config.height) {

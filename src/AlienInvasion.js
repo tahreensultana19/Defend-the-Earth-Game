@@ -30,19 +30,38 @@ class AlienInvasion extends Phaser.Scene {
     console.log(`AlienInvasion scene started with difficulty: ${this.difficulty}, level: ${this.level}, score: ${this.score}`);
     
     // Adjust win score threshold based on the difficulty
-    switch (this.difficulty.toLowerCase()) {
-        case "beginner":
-            this.winScoreThreshold = 1000; // Set threshold for Beginner
-            break;
-        case "challenger":
-            this.winScoreThreshold = 2000; // Set threshold for Challenger
-            break;
-        case "expert":
-            this.winScoreThreshold = 2500; // Set threshold for Expert
-            break;
-        default:
-            this.winScoreThreshold = 1000; // Default to Beginner threshold if something goes wrong
-            break;
+    switch (this.difficulty) {
+      case "Beginner":
+        this.alienSpawnRate = 2000;
+        this.obstacleSpeed = 100;
+        this.asteroidSpawnScoreThreshold = 100; // Easier threshold for asteroids
+        this.bombSpawnScoreThreshold = 200; // Easier threshold for bombs
+        this.winScoreThreshold = 1000;
+        this.nextBossAt = 500;
+        break;
+      case "challenger":
+        this.alienSpawnRate = 1500;
+        this.obstacleSpeed = 150;
+        this.asteroidSpawnScoreThreshold = 200;
+        this.bombSpawnScoreThreshold = 350;
+        this.winScoreThreshold = 2000;
+        this.nextBossAt = 400;
+        break;
+      case "expert":
+        this.alienSpawnRate = 1000;
+        this.obstacleSpeed = 200;
+        this.asteroidSpawnScoreThreshold = 300;
+        this.bombSpawnScoreThreshold = 450;
+        this.winScoreThreshold = 2500;
+        this.nextBossAt = 300;
+        break;
+      default:
+        this.alienSpawnRate = 1500;
+        this.obstacleSpeed = 150;
+        this.asteroidSpawnScoreThreshold = 200;
+        this.bombSpawnScoreThreshold = 350;
+        this.winScoreThreshold = 1000;
+        this.nextBossAt = 500;  
     }
 
     // Log the win score threshold for debugging purposes
@@ -111,6 +130,8 @@ class AlienInvasion extends Phaser.Scene {
     this.gameOver = false;
     this.allowAlienSpawns = true;
     this.spreadPowerActive = false;
+    this.nextBossAt = 500  // Reset the boss spawn threshold
+    this.currentBoss = null;  // Ensure boss is null on restart
 
     this.player = this.physics.add.sprite(400, 550, "spaceship");
     this.player.setDisplaySize(64, 64);
@@ -125,7 +146,7 @@ class AlienInvasion extends Phaser.Scene {
     this.scoreText = this.add.text(16, 16, "Score: 0", {
       fontSize: "32px",
       fill: "#fff",
-    });
+    }); 
 
     // Create the explosion animation using the 5 blast images
     this.anims.create({
@@ -184,7 +205,7 @@ class AlienInvasion extends Phaser.Scene {
 
     // Alien spawning timer
     this.alienTimer = this.time.addEvent({
-      delay: 3000,
+      delay: this.alienSpawnRate,
       callback: this.spawnAliens,
       callbackScope: this,
       loop: true,
@@ -270,6 +291,16 @@ class AlienInvasion extends Phaser.Scene {
 
     this.scoreText.setText("Score: " + this.score);
 
+     // Check for boss spawn
+     if (this.score >= this.nextBossAt && !this.currentBoss && !this.gameOver) {
+      console.log("Spawning boss at score:", this.score); // Debug log
+      this.spawnBoss();
+  }
+  
+  if (this.currentBoss) {
+      this.currentBoss.update();
+  }
+
     // Add the win condition check here
     this.checkWinCondition();
   }
@@ -282,8 +313,21 @@ class AlienInvasion extends Phaser.Scene {
     // Create new boss instance
     this.currentBoss = new Boss(this, this.score);
     
-    // Add a direct handler for boss destroyed
-    this.currentBoss.on('destroy', () => {
+    // Add bullet collision
+    this.physics.add.collider(
+        this.currentBoss,
+        this.bullets,
+        (boss, bullet) => {
+            if (boss.phase === 'battle' && !boss.isInvulnerable) {
+                boss.onHit(bullet);
+            }
+        },
+        null,
+        this
+    );
+    
+    // Listen for the destroy event
+    this.currentBoss.events.on('destroy', () => {
         console.log("Boss destroyed, resuming alien spawns");
         this.allowAlienSpawns = true;
         this.currentBoss = null;
@@ -344,7 +388,7 @@ class AlienInvasion extends Phaser.Scene {
   spawnAsteroids() {
     if (this.gameOver) return;
 
-    const speed = Phaser.Math.Between(50, 100);
+    const speed = this.obstacleSpeed + Phaser.Math.Between(-50, 50);
     const asteroidX = Phaser.Math.Between(50, 750);
     const asteroidY = -50; // Start from above the screen
 
@@ -361,7 +405,7 @@ class AlienInvasion extends Phaser.Scene {
     const bombX = Phaser.Math.Between(50, 750);
     const bombY = -50; // Start from above the screen
     const bomb = this.bombs.create(bombX, bombY, "bomb");
-    bomb.setVelocityY(100); // Bomb falls down with this speed
+    bomb.setVelocityY(speed); // Bomb falls down with this speed
     bomb.setDisplaySize(32, 32);
   }
 
