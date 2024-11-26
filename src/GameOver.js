@@ -10,7 +10,7 @@ class GameOver extends Phaser.Scene {
 
   preload() {
     // Load background image and music
-    this.load.image('gameOverBg', 'assets/GameOver.jpg');
+    this.load.image('gameOverBg', 'assets/GameOver1.jpg');
     this.load.audio('gameOverMusic', 'assets/game_over_music.mp3'); // Replace with your music file
   }
 

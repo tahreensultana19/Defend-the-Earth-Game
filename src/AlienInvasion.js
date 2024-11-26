@@ -21,27 +21,42 @@ class AlienInvasion extends Phaser.Scene {
   }
 
   init(data) {
-    // Ensure that the data passed contains the difficulty and level
+    // Ensure that the data passed contains difficulty, level, and score
     this.difficulty = data.difficulty || 'Beginner'; // Default to 'Beginner' if not passed
-    // console.log(AlienInvasion scene started with difficulty: ${this.difficulty});
-
+    this.score = data.score || 0; // Default to 0 score if not passed
+    this.level = data.level || 'beginner'; // Default to 'beginner' if not passed
+    
+    // Log the received data for debugging purposes
+    console.log(`AlienInvasion scene started with difficulty: ${this.difficulty}, level: ${this.level}, score: ${this.score}`);
+    
     // Adjust win score threshold based on the difficulty
-    switch (this.difficulty) {
-      case "Beginner":
-        this.winScoreThreshold = 1000; // Set threshold for Beginner
-        break;
-      case "challenger":
-        this.winScoreThreshold = 2000; // Set threshold for Challenger
-        break;
-      case "expert":
-        this.winScoreThreshold = 2500; // Set threshold for Expert
-        break;
-      default:
-        this.winScoreThreshold = 1000; 
+    switch (this.difficulty.toLowerCase()) {
+        case "beginner":
+            this.winScoreThreshold = 1000; // Set threshold for Beginner
+            break;
+        case "challenger":
+            this.winScoreThreshold = 2000; // Set threshold for Challenger
+            break;
+        case "expert":
+            this.winScoreThreshold = 2500; // Set threshold for Expert
+            break;
+        default:
+            this.winScoreThreshold = 1000; // Default to Beginner threshold if something goes wrong
+            break;
     }
 
+    // Log the win score threshold for debugging purposes
     console.log(`Win score threshold set to: ${this.winScoreThreshold}`);
-  }
+    
+    // Check if the player's score is above the threshold for the current difficulty
+    if (this.score >= this.winScoreThreshold) {
+        console.log('Player has won!');
+        // Optionally, display a congratulatory message or trigger an event
+    } else {
+        console.log('Player has not reached the required score to win');
+    }
+}
+
 
   preload() {
     this.load.audio("backgroundMusic", "assets/background1.mp3"); // Load background music
