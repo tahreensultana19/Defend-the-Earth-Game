@@ -155,9 +155,7 @@ class MenuScene extends Phaser.Scene {
         fontStyle: 'bold', // Bold text
       }).setOrigin(0.5);
 
-      buttonBox.on('pointerdown', () => {
-        
-        this.menuMusic.stop(); 
+      buttonBox.on('pointerdown', () => {z
         this.scene.start('AlienInvasion', { difficulty: difficulty.toLowerCase() });
       });
 
