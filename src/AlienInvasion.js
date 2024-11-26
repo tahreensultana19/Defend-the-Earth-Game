@@ -40,11 +40,11 @@ class AlienInvasion extends Phaser.Scene {
         this.winScoreThreshold = 1000; 
     }
 
-    // console.log(Win score threshold set to: ${this.winScoreThreshold});
+    console.log(`Win score threshold set to: ${this.winScoreThreshold}`);
   }
 
   preload() {
-    this.load.audio("backgroundMusic", "assets/backgroundmusic.m4a"); // Load background music
+    this.load.audio("backgroundMusic", "assets/background1.mp3"); // Load background music
 
     this.load.image("sky", "assets/bg.png");
     this.load.image("spaceship", "assets/1.png");
@@ -68,10 +68,24 @@ class AlienInvasion extends Phaser.Scene {
     this.load.image('bossProjectile4', 'assets/frames/charged4.png');
     this.load.image('bossProjectile5', 'assets/frames/charged5.png');
     this.load.image('bossProjectile6', 'assets/frames/charged6.png');
+    this.load.spritesheet("explosion", "assets/explosion.png", { frameWidth: 64, frameHeight: 64 });
+    this.load.image('blast1', 'assets/blast/blast1.png');
+    this.load.image('blast2', 'assets/blast/blast2.png');
+    this.load.image('blast3', 'assets/blast/blast3.png');
+    this.load.image('blast4', 'assets/blast/blast4.png');
+    this.load.image('blast5', 'assets/blast/blast5.png');
+    this.load.image('blast6', 'assets/blast/blast6.png');
+    this.load.image('blast7', 'assets/blast/blast7.png');
+    this.load.image('blast8', 'assets/blast/blast8.png');
+    this.load.image('blast9', 'assets/blast/blast9.png');
+    this.load.image('blast10', 'assets/blast/blast10.png');
+    this.load.image('blast11', 'assets/blast/blast11.png');
+ 
+    // this.load.audio('explosionSound', 'assets/sounds/explosion.mp3');
   }
-
+  
   create() {
-    this.backgroundMusic = this.sound.add("backgroundMusic", { loop: true, volume: 0.5 }); // Add background music
+    this.backgroundMusic = this.sound.add("backgroundMusic", { loop: true, volume: 1.0 }); // Add background music
     this.backgroundMusic.play(); // Play background music
 
     this.add.image(400, 300, "sky");
@@ -97,6 +111,28 @@ class AlienInvasion extends Phaser.Scene {
       fontSize: "32px",
       fill: "#fff",
     });
+
+    // Create the explosion animation using the 5 blast images
+    this.anims.create({
+      key: 'explode',
+      frames: [
+          { key: 'blast1' },
+          { key: 'blast2' },
+          { key: 'blast3' },
+          { key: 'blast4' },
+          { key: 'blast5' },
+          { key: 'blast6' },
+          { key: 'blast7' },
+          { key: 'blast8' },
+          { key: 'blast9' },
+          { key: 'blast10' },
+          { key: 'blast11' }
+
+      ],
+      frameRate: 10,  // Adjust frame rate to control speed
+      yoyo: false,    // Animation should not loop
+      repeat: 0       // Play the animation once
+  });
 
     this.hearts = [];
     for (let i = 0; i < this.maxHealth; i++) {
@@ -431,6 +467,13 @@ class AlienInvasion extends Phaser.Scene {
         );
       }
     });
+    // this.physics.add.collider(
+    //   this.player,
+    //   this.aliens,
+    //   this.hitAlienWithPlayer,
+    //   null,
+    //   this
+    // );
 
     this.input.keyboard.on("keydown-SPACE", () => {
       if (this.cloneActive) {
@@ -543,6 +586,13 @@ class AlienInvasion extends Phaser.Scene {
     alien.destroy();
     this.sound.play("explosion");
 
+    // Create explosion animation
+    const explosion = this.physics.add.sprite(alien.x, alien.y, "explosion");
+    explosion.play("explode"); // Play the explosion animation
+    explosion.on("animationcomplete", () => {
+        explosion.destroy(); // Destroy the explosion sprite after the animation is complete
+    });
+
     const points = 10 * this.scoreMultiplier;
     this.score += points;
     this.checkWinCondition();
@@ -561,9 +611,15 @@ class AlienInvasion extends Phaser.Scene {
     this.loseHealth();
   }
 
+
+
+
   hitBomb(player, bomb) {
     console.log("Bomb hit detected!");
     bomb.destroy();
+
+    
+
 
     // Skip losing health if the shield is active
     if (this.shieldActive) {
