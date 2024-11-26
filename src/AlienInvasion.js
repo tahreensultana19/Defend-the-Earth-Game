@@ -331,7 +331,7 @@ class AlienInvasion extends Phaser.Scene {
         console.log("Boss destroyed, resuming alien spawns");
         this.allowAlienSpawns = true;
         this.currentBoss = null;
-        this.nextBossAt = this.score + 500;
+        this.nextBossAt = this.score + 400;
     });
 }
 

@@ -105,10 +105,10 @@ class Boss extends Phaser.GameObjects.Sprite {
     calculateHealth = (score) => {
         let baseHealth = 100;
         
-        if (score >= 1000) {
+        if (score >= 500) {
             baseHealth = 200;  // More health at higher scores
         }
-        if (score >= 2000) {
+        if (score >= 1000) {
             baseHealth = 300;  // Even more health at very high scores
         }
         
@@ -251,7 +251,7 @@ class Boss extends Phaser.GameObjects.Sprite {
             onComplete: () => {
                 if (!this.scene) return;
                 
-                this.scene.score += 200;
+                this.scene.score += 100;
                 this.healthBarBackground.destroy();
                 this.healthBar.destroy();
                 this.debugText.destroy();
