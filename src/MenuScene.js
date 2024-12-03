@@ -14,8 +14,10 @@ class MenuScene extends Phaser.Scene {
     this.background = this.add.image(400, 300, 'spaceBg').setDisplaySize(800, 600);
 
     // Play menu music
-    this.menuMusic = this.sound.add('menuMusic', { loop: true, volume: 1.0 });
+    this.menuMusic = this.sound.add('menuMusic', { loop: true,});
+    this.menuMusic.setVolume(0.1);
     this.menuMusic.play();
+    this.menuMusic.setRate(2.0)
 
     // Add title with floating effect and shadows
     this.titleText = this.add.text(400, 100, 'DEFENDER OF EARTH', {

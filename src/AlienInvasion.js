@@ -12,23 +12,19 @@ class AlienInvasion extends Phaser.Scene {
     this.scoreMultiplier = 1; // Default multiplier
     this.shieldActive = false;
     this.winScoreThreshold = 0; // Initialize with default value
-    this.difficulty = ''; // Will store difficulty
+    this.difficulty = ""; // Will store difficulty
     this.cloneActive = false; // Track if clone power-up is active
     this.spreadPowerActive = false; // Track spread power-up status
     this.level = 1; // Default level
-    this.nextBossAt = 500;   // Score threshold for the next boss
     this.currentBoss = null;
   }
 
   init(data) {
     // Ensure that the data passed contains difficulty, level, and score
-    this.difficulty = data.difficulty || 'Beginner'; // Default to 'Beginner' if not passed
+    this.difficulty = data.difficulty || "Beginner"; // Default to 'Beginner' if not passed
     this.score = data.score || 0; // Default to 0 score if not passed
-    this.level = data.level || 'beginner'; // Default to 'beginner' if not passed
-    
-    // Log the received data for debugging purposes
-    console.log(`AlienInvasion scene started with difficulty: ${this.difficulty}, level: ${this.level}, score: ${this.score}`);
-    
+    this.level = data.level || "beginner"; // Default to 'beginner' if not passed
+
     // Adjust win score threshold based on the difficulty
     switch (this.difficulty) {
       case "Beginner":
@@ -61,24 +57,12 @@ class AlienInvasion extends Phaser.Scene {
         this.asteroidSpawnScoreThreshold = 200;
         this.bombSpawnScoreThreshold = 350;
         this.winScoreThreshold = 1000;
-        this.nextBossAt = 500;  
+        this.nextBossAt = 500;
     }
-
-    // Log the win score threshold for debugging purposes
-    console.log(`Win score threshold set to: ${this.winScoreThreshold}`);
-    
-    // Check if the player's score is above the threshold for the current difficulty
-    if (this.score >= this.winScoreThreshold) {
-        console.log('Player has won!');
-        // Optionally, display a congratulatory message or trigger an event
-    } else {
-        console.log('Player has not reached the required score to win');
-    }
-}
-
+  }
 
   preload() {
-    this.load.audio("backgroundMusic", "assets/background1.mp3"); // Load background music
+    this.load.audio("backgroundMusic", "assets/backgroundmusic.m4a"); // Load background music
 
     this.load.image("sky", "assets/bg.png");
     this.load.image("spaceship", "assets/1.png");
@@ -96,30 +80,34 @@ class AlienInvasion extends Phaser.Scene {
     this.load.image("powerup-spread", "assets/spread.png");
     this.load.image("heart", "assets/heart.png");
     this.load.image("powerup-clone", "assets/1.png");
-    this.load.image('bossProjectile1', 'assets/frames/charged1.png');
-    this.load.image('bossProjectile2', 'assets/frames/charged2.png');
-    this.load.image('bossProjectile3', 'assets/frames/charged3.png');
-    this.load.image('bossProjectile4', 'assets/frames/charged4.png');
-    this.load.image('bossProjectile5', 'assets/frames/charged5.png');
-    this.load.image('bossProjectile6', 'assets/frames/charged6.png');
-    this.load.spritesheet("explosion", "assets/explosion.png", { frameWidth: 64, frameHeight: 64 });
-    this.load.image('blast1', 'assets/blast/blast1.png');
-    this.load.image('blast2', 'assets/blast/blast2.png');
-    this.load.image('blast3', 'assets/blast/blast3.png');
-    this.load.image('blast4', 'assets/blast/blast4.png');
-    this.load.image('blast5', 'assets/blast/blast5.png');
-    this.load.image('blast6', 'assets/blast/blast6.png');
-    this.load.image('blast7', 'assets/blast/blast7.png');
-    this.load.image('blast8', 'assets/blast/blast8.png');
-    this.load.image('blast9', 'assets/blast/blast9.png');
-    this.load.image('blast10', 'assets/blast/blast10.png');
-    this.load.image('blast11', 'assets/blast/blast11.png');
- 
+    this.load.image("bossProjectile1", "assets/frames/charged1.png");
+    this.load.image("bossProjectile2", "assets/frames/charged2.png");
+    this.load.image("bossProjectile3", "assets/frames/charged3.png");
+    this.load.image("bossProjectile4", "assets/frames/charged4.png");
+    this.load.image("bossProjectile5", "assets/frames/charged5.png");
+    this.load.image("bossProjectile6", "assets/frames/charged6.png");
+    this.load.spritesheet("explosion", "assets/explosion.png", {
+      frameWidth: 64,
+      frameHeight: 64,
+    });
+    this.load.image("blast1", "assets/blast/blast1.png");
+    this.load.image("blast2", "assets/blast/blast2.png");
+    this.load.image("blast3", "assets/blast/blast3.png");
+    this.load.image("blast4", "assets/blast/blast4.png");
+    this.load.image("blast5", "assets/blast/blast5.png");
+    this.load.image("blast6", "assets/blast/blast6.png");
+    this.load.image("blast7", "assets/blast/blast7.png");
+    this.load.image("blast8", "assets/blast/blast8.png");
+    this.load.image("blast9", "assets/blast/blast9.png");
+    this.load.image("blast10", "assets/blast/blast10.png");
+    this.load.image("blast11", "assets/blast/blast11.png");
+
     // this.load.audio('explosionSound', 'assets/sounds/explosion.mp3');
   }
-  
+
   create() {
-    this.backgroundMusic = this.sound.add("backgroundMusic", { loop: true, volume: 1.0 }); // Add background music
+    this.backgroundMusic = this.sound.add("backgroundMusic", { loop: true }); // Add background music
+    this.backgroundMusic.setVolume(0.5);
     this.backgroundMusic.play(); // Play background music
 
     this.add.image(400, 300, "sky");
@@ -130,8 +118,8 @@ class AlienInvasion extends Phaser.Scene {
     this.gameOver = false;
     this.allowAlienSpawns = true;
     this.spreadPowerActive = false;
-    this.nextBossAt = 500  // Reset the boss spawn threshold
-    this.currentBoss = null;  // Ensure boss is null on restart
+    this.nextBossAt = 500; // Reset the boss spawn threshold
+    this.currentBoss = null; // Ensure boss is null on restart
 
     this.player = this.physics.add.sprite(400, 550, "spaceship");
     this.player.setDisplaySize(64, 64);
@@ -146,29 +134,28 @@ class AlienInvasion extends Phaser.Scene {
     this.scoreText = this.add.text(16, 16, "Score: 0", {
       fontSize: "32px",
       fill: "#fff",
-    }); 
+    });
 
     // Create the explosion animation using the 5 blast images
     this.anims.create({
-      key: 'explode',
+      key: "explode",
       frames: [
-          { key: 'blast1' },
-          { key: 'blast2' },
-          { key: 'blast3' },
-          { key: 'blast4' },
-          { key: 'blast5' },
-          { key: 'blast6' },
-          { key: 'blast7' },
-          { key: 'blast8' },
-          { key: 'blast9' },
-          { key: 'blast10' },
-          { key: 'blast11' }
-
+        { key: "blast1" },
+        { key: "blast2" },
+        { key: "blast3" },
+        { key: "blast4" },
+        { key: "blast5" },
+        { key: "blast6" },
+        { key: "blast7" },
+        { key: "blast8" },
+        { key: "blast9" },
+        { key: "blast10" },
+        { key: "blast11" },
       ],
-      frameRate: 10,  // Adjust frame rate to control speed
-      yoyo: false,    // Animation should not loop
-      repeat: 0       // Play the animation once
-  });
+      frameRate: 10, // Adjust frame rate to control speed
+      yoyo: false, // Animation should not loop
+      repeat: 0, // Play the animation once
+    });
 
     this.hearts = [];
     for (let i = 0; i < this.maxHealth; i++) {
@@ -193,13 +180,18 @@ class AlienInvasion extends Phaser.Scene {
         this.cleanup();
 
         // Transition to the WinScreen with a delay
-        this.time.delayedCall(500, () => {
-          this.scene.start('WinScreen', {
-            level: this.level,         // Pass the current level
-            score: this.score,         // Pass the current score
-            difficulty: this.difficulty // Pass the current difficulty level
-          });
-        }, [], this);
+        this.time.delayedCall(
+          500,
+          () => {
+            this.scene.start("WinScreen", {
+              level: this.level, // Pass the current level
+              score: this.score, // Pass the current score
+              difficulty: this.difficulty, // Pass the current difficulty level
+            });
+          },
+          [],
+          this
+        );
       }
     };
 
@@ -291,15 +283,14 @@ class AlienInvasion extends Phaser.Scene {
 
     this.scoreText.setText("Score: " + this.score);
 
-     // Check for boss spawn
-     if (this.score >= this.nextBossAt && !this.currentBoss && !this.gameOver) {
-      console.log("Spawning boss at score:", this.score); // Debug log
+    // Check for boss spawn
+    if (this.score >= this.nextBossAt && !this.currentBoss && !this.gameOver) {
       this.spawnBoss();
-  }
-  
-  if (this.currentBoss) {
+    }
+
+    if (this.currentBoss) {
       this.currentBoss.update();
-  }
+    }
 
     // Add the win condition check here
     this.checkWinCondition();
@@ -308,42 +299,54 @@ class AlienInvasion extends Phaser.Scene {
     // Check if a boss is already present or if the game is over
     if (this.currentBoss || this.gameOver) return;
 
-    console.log("Boss spawn initiated");
-    
     // Stop spawning aliens, asteroids, and bombs
     this.allowAlienSpawns = false; // Stop alien spawns
     if (this.asteroidTimer) this.asteroidTimer.paused = true; // Stop asteroid spawns
     if (this.bombTimer) this.bombTimer.paused = true; // Stop bomb spawns
+    if (this.powerUpTimer) this.powerUpTimer.paused = true;
+    // Clear any existing projectiles
+    this.bullets.clear(true, true);
+    this.aliens.clear(true, true);
+    this.asteroids.clear(true, true);
+    this.bombs.clear(true, true);
+    this.powerUps.clear(true,true);
 
     // Create a new boss instance
     this.currentBoss = new Boss(this, this.score);
-    
+
     // Add bullet collision with the boss
     this.physics.add.collider(
-        this.currentBoss,
-        this.bullets,
-        (boss, bullet) => {
-            if (boss.phase === 'battle' && !boss.isInvulnerable) {
-                boss.onHit(bullet);
-            }
-        },
-        null,
-        this
+      this.currentBoss,
+      this.bullets,
+      (boss, bullet) => {
+        if (boss.phase === "battle" && !boss.isInvulnerable) {
+          boss.onHit(bullet);
+        } else {
+          bullet.destroy(); // Destroy bullets during entrance phase
+      }
+      },
+      null,
+      this
     );
-    
+
     // Listen for the destroy event of the boss
-    this.currentBoss.events.on('destroy', () => {
-        console.log("Boss destroyed, resuming enemy spawns");
-        
-        // Resume spawning of aliens, asteroids, and bombs
-        this.allowAlienSpawns = true; // Resume alien spawns
-        if (this.asteroidTimer) this.asteroidTimer.paused = false; // Resume asteroid spawns
-        if (this.bombTimer) this.bombTimer.paused = false; // Resume bomb spawns
-        
-        this.currentBoss = null; // Clear the current boss reference
-        this.nextBossAt = this.score + 400; // Set the next boss spawn threshold based on current score
+    this.currentBoss.events.on("destroy", () => {
+      // Resume spawning of aliens, asteroids, and bombs
+      this.allowAlienSpawns = true; // Resume alien spawns
+      if (this.asteroidTimer) this.asteroidTimer.paused = false; // Resume asteroid spawns
+      if (this.bombTimer) this.bombTimer.paused = false; // Resume bomb spawns
+
+      // Clear any existing projectiles
+      this.bullets.clear(true, true);
+      this.aliens.clear(true, true);
+      this.asteroids.clear(true, true);
+      this.bombs.clear(true, true)
+      this.powerUps.clear(true,true);
+
+      this.currentBoss = null; // Clear the current boss reference
+      this.nextBossAt = this.score + 400; // Set the next boss spawn threshold based on current score
     });
-}
+  }
 
   shootSpread() {
     const offsets = [-15, 0, 15]; // Three directions: slight left, center, slight right
@@ -376,12 +379,6 @@ class AlienInvasion extends Phaser.Scene {
   }
 
   spawnAliens() {
-     // Add debug logs
-     console.log('Spawn check:', {
-      allowSpawns: this.allowAlienSpawns,
-      gameOver: this.gameOver,
-      hasBoss: !!this.currentBoss
-  });
     if (this.gameOver || !this.allowAlienSpawns) return;
 
     const speed = Phaser.Math.Between(50, 100);
@@ -659,7 +656,7 @@ class AlienInvasion extends Phaser.Scene {
     const explosion = this.physics.add.sprite(alien.x, alien.y, "explosion");
     explosion.play("explode"); // Play the explosion animation
     explosion.on("animationcomplete", () => {
-        explosion.destroy(); // Destroy the explosion sprite after the animation is complete
+      explosion.destroy(); // Destroy the explosion sprite after the animation is complete
     });
 
     const points = 10 * this.scoreMultiplier;
@@ -668,31 +665,20 @@ class AlienInvasion extends Phaser.Scene {
   }
 
   hitAsteroid(player, asteroid) {
-    console.log("Asteroid hit detected!");
     asteroid.destroy();
 
     // Skip losing health if the shield is active
     if (this.shieldActive) {
-      console.log("Shield protected the player from asteroid!");
       return;
     }
 
     this.loseHealth();
   }
 
-
-
-
   hitBomb(player, bomb) {
-    console.log("Bomb hit detected!");
     bomb.destroy();
-
-    
-
-
     // Skip losing health if the shield is active
     if (this.shieldActive) {
-      console.log("Shield protected the player from bomb!");
       return;
     }
 

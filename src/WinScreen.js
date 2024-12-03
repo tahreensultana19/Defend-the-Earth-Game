@@ -16,8 +16,6 @@ export default class WinScreen extends Phaser.Scene {
         this.level = data.level || 'beginner'; // Default to 'beginner' if no level passed
         this.score = data.score || 0; // Default to 0 score if no score passed
         this.difficulty = data.difficulty || 'Beginner'; // Default to 'Beginner' difficulty if none passed
-
-        console.log(WinScreen -`Level: ${this.level}, Score: ${this.score}, Difficulty: ${this.difficulty}`);
     }
 
     create() {

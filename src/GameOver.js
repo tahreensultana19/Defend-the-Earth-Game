@@ -19,7 +19,8 @@ class GameOver extends Phaser.Scene {
     this.add.image(400, 300, 'gameOverBg').setDisplaySize(800, 600);
 
     // Play background music
-    this.gameOverMusic = this.sound.add('gameOverMusic', { loop: true, volume: 0.5 });
+    this.gameOverMusic = this.sound.add('gameOverMusic', { loop: true, });
+    this.gameOverMusic.setVolume(0.5);
     this.gameOverMusic.play();
 
     // Add enhanced title
